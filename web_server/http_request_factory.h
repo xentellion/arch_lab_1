@@ -1,5 +1,6 @@
-#ifndef HTTPREQUESTFACTORY_H
-#define HTTPREQUESTFACTORY_H
+#pragma once
+#ifndef HTTP_REQUEST_FACTORY_H
+#define HTTP_REQUEST_FACTORY_H
 
 #include "Poco/Net/HTTPServer.h"
 #include "Poco/Net/HTTPRequestHandler.h"
@@ -18,7 +19,9 @@
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
+
 #include <iostream>
+#include <memory>
 
 using Poco::Net::ServerSocket;
 using Poco::Net::HTTPRequestHandler;
@@ -40,31 +43,22 @@ using Poco::Util::HelpFormatter;
 
 #include "handlers/person_handler.h"
 
-
-static bool startsWith(const std::string& str, const std::string& prefix)
-{
+static bool startsWith(const std::string& str, const std::string& prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
 }
 
-
-class HTTPRequestFactory: public HTTPRequestHandlerFactory
-{
+class HTTPRequestFactory : public HTTPRequestHandlerFactory {
 public:
-    HTTPRequestFactory(const std::string& format):
-        _format(format)
-    {
-    }
+    HTTPRequestFactory(const std::string& format): m_format (format) { }
 
-    HTTPRequestHandler* createRequestHandler(
-        const HTTPServerRequest& request)
-    {
-        static std::string author="/author"; 
-        if (startsWith(request.getURI(),author)) return new PersonHandler(_format);
+    HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request) override {
+        static std::string person = "/person";
+        if (startsWith(request.getURI(), person)) return new PersonHandler(m_format);
         return 0;
     }
 
 private:
-    std::string _format;
+    std::string m_format;
 };
 
-#endif
+#endif // HTTP_REQUEST_FACTORY_H
